@@ -12,3 +12,4 @@
    - This global interest rate can only decrease to incentivise/reward early adapters.
 # cross-chain-rebase-token
 # cross-chain-rebase-token
+# cross-chain-rebase-token
