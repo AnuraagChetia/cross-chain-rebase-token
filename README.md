@@ -10,7 +10,3 @@
 3. Interest rate
    - Individually set an interest rate of each user based on some global interest rate of the protocol at the time the user deposits into the vault.
    - This global interest rate can only decrease to incentivise/reward early adapters.
-# cross-chain-rebase-token
-# cross-chain-rebase-token
-# cross-chain-rebase-token
-# cross-chain-rebase-token
