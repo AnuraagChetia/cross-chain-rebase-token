@@ -66,7 +66,7 @@ contract CrossChainTest is Test {
 
         sepoliaToken.grantMintAndBurnRole(address(vault));
         sepoliaToken.grantMintAndBurnRole(address(sepoliaPool));
-
+        //CCIP SETUP
         RegistryModuleOwnerCustom(sepoliaNetworkDetails.registryModuleOwnerCustomAddress).registerAdminViaOwner(
             address(sepoliaToken)
         );
@@ -151,6 +151,8 @@ contract CrossChainTest is Test {
 
         Client.EVMTokenAmount[] memory tokenAmounts = new Client.EVMTokenAmount[](1);
         tokenAmounts[0] = Client.EVMTokenAmount({token: address(localToken), amount: amountToBridge});
+        // Create an EVM2AnyMessage struct in memory with necessary information for sending a cross-chain message
+        //  address(linkToken) means fees are paid in LINK
         Client.EVM2AnyMessage memory message = Client.EVM2AnyMessage({
             receiver: abi.encode(user), // abi.encode(receiver address) for dest EVM chains.
             data: "", // Data payload.
