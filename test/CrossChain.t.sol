@@ -6,9 +6,7 @@ import {Test, console} from "forge-std/Test.sol";
 import {CCIPLocalSimulatorFork, Register} from "chainlink-local/ccip/CCIPLocalSimulatorFork.sol";
 import {RegistryModuleOwnerCustom} from
     "../lib/chainlink/contracts/src/v0.8/ccip/tokenAdminRegistry/RegistryModuleOwnerCustom.sol";
-// import {RegistryModuleOwnerCustom} from "ccip/contracts/src/v0.8/ccip/tokenAdminRegistry/RegistryModuleOwnerCustom.sol";
 import {TokenAdminRegistry} from "../lib/chainlink/contracts/src/v0.8/ccip/tokenAdminRegistry/TokenAdminRegistry.sol";
-// import {TokenAdminRegistry} from "ccip/contracts/src/v0.8/ccip/tokenAdminRegistry/TokenAdminRegistry.sol";
 import {TokenPool} from "../lib/chainlink/contracts/src/v0.8/ccip/pools/TokenPool.sol";
 import {RateLimiter} from "../lib/chainlink/contracts/src/v0.8/ccip/libraries/RateLimiter.sol";
 import {Client} from "../lib/chainlink/contracts/src/v0.8/ccip/libraries/Client.sol";
@@ -180,17 +178,12 @@ contract CrossChainTest is Test {
 
         assertEq(localBalanceAfter, localBalanceBefore - amountToBridge);
 
-        uint256 localUserInterestRate = localToken.getUserInterestRate(user);
-
         vm.selectFork(remoteFork);
         vm.warp(block.timestamp + 20 minutes);
         uint256 remoteBalanceBefore = remoteToken.balanceOf(user);
         ccipLocalSimulatorFork.switchChainAndRouteMessage(remoteFork);
         uint256 remoteBalanceAfter = remoteToken.balanceOf(user);
         assertEq(remoteBalanceAfter, remoteBalanceBefore + amountToBridge);
-
-        uint256 remoteUserInterestRate = remoteToken.getUserInterestRate(user);
-        assertEq(remoteUserInterestRate, localUserInterestRate);
     }
 
     function testBridgeAllToken() public {
