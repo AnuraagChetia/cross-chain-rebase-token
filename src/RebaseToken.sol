@@ -25,6 +25,7 @@
 pragma solidity ^0.8.22;
 
 import {ERC20} from "@openzeppelin/contracts/token/ERC20/ERC20.sol";
+import {console} from "forge-std/console.sol";
 import {Ownable} from "@openzeppelin/contracts/access/Ownable.sol";
 import {AccessControl} from "@openzeppelin/contracts/access/AccessControl.sol";
 
@@ -60,6 +61,10 @@ contract RebaseToken is ERC20, Ownable, AccessControl {
 
     constructor() ERC20("Rebase Token", "RBT") Ownable(msg.sender) {}
 
+    function grantMintAndBurnRole(address _account) external onlyOwner {
+        _grantRole(MINT_AND_BURN_ROLE, _account);
+    }
+
     /**
      * @notice Set the interest rate in the contract
      * @param _newInterestRate The new interest rate to set
@@ -67,7 +72,7 @@ contract RebaseToken is ERC20, Ownable, AccessControl {
      */
     function setInterestRate(uint256 _newInterestRate) external onlyOwner {
         //Set the interest rate
-        if (_newInterestRate < s_interestRate) {
+        if (_newInterestRate >= s_interestRate) {
             revert RebaseToken_InterestRateCanOnlyDecrease(s_interestRate, _newInterestRate);
         }
         s_interestRate = _newInterestRate;
@@ -75,16 +80,16 @@ contract RebaseToken is ERC20, Ownable, AccessControl {
     }
 
     /**
-     * @notice Mint the user tokens when they deposit into the vaul
+     * @notice Mint the user tokens when they deposit into the vault
      * @param _to The user to mint the tokens to
      * @param _amount The amount of tokens to mint
      */
-    function mint(address _to, uint256 _amount) external onlyRole(MINT_AND_BURN_ROLE) {
+    function mint(address _to, uint256 _amount, uint256 _userInterestRate) external onlyRole(MINT_AND_BURN_ROLE) {
         // Before minting new tokens, we need to mint the previous accrued interest.
         // **Accrued interest** - The interest that has been earned but not yet paid out
         _mintAccruedInterest(_to);
         //Set user interest rate
-        s_userInterestRate[_to] = s_interestRate;
+        s_userInterestRate[_to] = _userInterestRate;
         _mint(_to, _amount);
     }
 
@@ -94,9 +99,6 @@ contract RebaseToken is ERC20, Ownable, AccessControl {
      * @param _amount The amount of tokens to burn
      */
     function burn(address _from, uint256 _amount) external onlyRole(MINT_AND_BURN_ROLE) {
-        if (_amount == type(uint256).max) {
-            _amount = balanceOf(_from);
-        }
         _mintAccruedInterest(_from);
         _burn(_from, _amount);
     }
@@ -179,7 +181,8 @@ contract RebaseToken is ERC20, Ownable, AccessControl {
         // 10 + ( 10 * 0.5 * 2 ) = 20 tokens
         /* *********** */
         // principal amount + ( principal amount * user interest rate * time elapsed ) == princial amount( 1 + ( 1 * user interest rate * time elapsed))
-        uint256 timeElapsed = block.timestamp - s_userInterestRate[_user];
+
+        uint256 timeElapsed = block.timestamp - s_userLastUpdatedTimestamp[_user];
         linearInterest = PRECISION_FACTOR + (s_userInterestRate[_user] * timeElapsed);
     }
 
